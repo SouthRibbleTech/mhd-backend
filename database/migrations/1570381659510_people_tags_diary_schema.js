@@ -5,7 +5,7 @@ const Schema = use('Schema')
 
 class PeopleTagsDiarySchema extends Schema {
   up () {
-    this.create('diary_tags_people', (table) => {
+    this.create('diary_people_tag', (table) => {
       table.increments()
       table.integer('user_id').unsigned().references('id').inTable('users')
       table.integer('diary_id').unsigned().references('id').inTable('diaries')
