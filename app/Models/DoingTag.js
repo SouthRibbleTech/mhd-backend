@@ -5,8 +5,9 @@ const Model = use('Model')
 
 class DoingTag extends Model {
     diaryEntries() {
-        return this.belongsToMany('App/Models/Diary').pivotTable('diary_tags_doing')
+        return this.belongsToMany('App/Models/Diary').pivotTable('diary_doing_tag')
     }
+    
 }
 
 module.exports = DoingTag

@@ -40,11 +40,11 @@ class User extends Model {
   }
 
   doingTags () {
-    return this.hasMany('App/Models/DoingTag')
+    return this.belongsToMany('App/Models/DoingTag')
   }
 
   peopleTags() {
-    return this.hasMany('App/Models/PeopleTag')
+    return this.belongsToMany('App/Models/PeopleTag')
   }
 }
 

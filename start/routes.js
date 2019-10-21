@@ -26,4 +26,6 @@ Route.group(()=>{
   Route.get('/tags/doing/:search', 'DoingTagController.searchTags').middleware('auth')
   Route.get('/tags/people/:search', 'PeopleTagController.searchTags').middleware('auth')
   Route.post('/diary', 'DiaryController.create').middleware('auth')
+  Route.get('/analysis/doingtagaverage', 'AnalysisController.doingTagAverage').middleware('auth')
+  Route.get('/analysis/peopletagaverage', 'AnalysisController.peopleTagAverage').middleware('auth')
 }).prefix('api/v1')

@@ -2,18 +2,21 @@
 const User = use('App/Models/User')
 class UserController {
   async register({ request, response, auth }) {
-    console.log(request.body.username, request.body.password)
     var user = new User()
     user.username = request.body.username
     user.password = request.body.password
+    user.email = request.body.email
+
     try {
       await user.save()
-      var userAuth = await auth.attempt(request.body.user, request.body.password)
+      var userAuth = await auth.attempt(request.body.username, request.body.password)
       return response.json({
         user: user,
-        auth: userAuth
+        auth: userAuth,
+
       })
     } catch (err) {
+      console.log(err)
       if (err.errno === 1062) {
         return response.json(err)
       }
