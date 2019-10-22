@@ -28,4 +28,10 @@ Route.group(()=>{
   Route.post('/diary', 'DiaryController.create').middleware('auth')
   Route.get('/analysis/doingtagaverage', 'AnalysisController.doingTagAverage').middleware('auth')
   Route.get('/analysis/peopletagaverage', 'AnalysisController.peopleTagAverage').middleware('auth')
+  Route.post('/invite', 'InviteController.create').middleware('auth')
+  Route.get('/invite', 'InviteController.index').middleware('auth')
+  Route.delete('/invite/:id', 'InviteController.destroy').middleware('auth')
+  Route.get('/settings', 'SettingController.index').middleware('auth')
+  Route.put('/settings','SettingController.update').middleware('auth')
+
 }).prefix('api/v1')

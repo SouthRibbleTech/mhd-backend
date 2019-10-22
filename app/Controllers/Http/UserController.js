@@ -1,5 +1,6 @@
 'use strict'
 const User = use('App/Models/User')
+const Setting = use('App/Models/Setting')
 class UserController {
   async register({ request, response, auth }) {
     var user = new User()
@@ -9,6 +10,10 @@ class UserController {
 
     try {
       await user.save()
+      //Check if settings already exist for this user
+      //if not then create them
+      await this.createSettings(user)
+
       var userAuth = await auth.attempt(request.body.username, request.body.password)
       return response.json({
         user: user,
@@ -25,11 +30,12 @@ class UserController {
 
 
   async login({ request, response, auth }) {
-    console.log(request.body.username, request.body.password)
     var userAuth = await auth.attempt(request.body.username, request.body.password)
-    console.log("Token", userAuth)
     var user = await User.query().where('username', request.body.username).first()
-    console.log("User", user)
+    //Check if settings already exist for this user
+    //if not then create them
+    await this.createSettings(user)
+
     return response.json({
       user: user,
       auth: userAuth
@@ -41,7 +47,7 @@ class UserController {
     response
   }) {
     var user = await User.query().where('username', request.body.username).first()
-    console.log(user)
+    
     if (user) {
       return response.status(409).json({
         error: 'duplicate user',
@@ -53,6 +59,18 @@ class UserController {
         message: 'Username is available'
       })
     }
+  }
+
+  async createSettings(user) {
+    var settings = user.settings().first()
+    if(settings) {
+      //settings already exist
+      //Just return
+      return
+    }
+    var setting = new Setting()
+    await user.settings().save(setting)
+    return setting
   }
 }
 

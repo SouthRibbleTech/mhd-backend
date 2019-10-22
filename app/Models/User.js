@@ -46,6 +46,18 @@ class User extends Model {
   peopleTags() {
     return this.belongsToMany('App/Models/PeopleTag')
   }
+
+  invitesSent() {
+    return this.hasMany('App/Models/Invite', 'id', 'invited_by')
+  }
+
+  invitesReceived() {
+    return this.hasMany('App/Models/Invite', 'id', 'invited_user')
+  }
+
+  settings() {
+    return this.hasOne('App/Models/Setting')
+  }
 }
 
 module.exports = User
