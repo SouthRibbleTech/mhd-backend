@@ -62,10 +62,11 @@ class UserController {
   }
 
   async createSettings(user) {
-    var settings = user.settings().first()
+    var settings = await user.settings().first()
     if(settings) {
       //settings already exist
       //Just return
+      console.log(settings)
       return
     }
     var setting = new Setting()
