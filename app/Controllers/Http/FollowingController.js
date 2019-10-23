@@ -21,10 +21,26 @@ class FollowingController {
    */
   async index ({ response, auth }) {
     var user = await auth.current.user
-    var following = await user.following().with('followingUser', (builder)=>{
-      builder.select('id', 'username')
-    }).fetch()
-    return response.json(following)
+    // var following = await user.following().with('followingUser', (builder)=>{
+    //   builder.select('id', 'username')
+    // }).fetch()
+
+    var following = await db.raw(`
+      select 
+      u.id, 
+      u.username, 
+      f.block as blocked,
+      if(f.other_user_id IS NOT NULL, 1, 0) as following,
+      if(fb.other_user_id IS NOT NULL, 1, 0) as follow_back
+      from users u
+      join settings s on s.user_id = u.id
+      left join followings f on f.user_id = ${user.id} and f.other_user_id = u.id
+      left join followings fb on fb.other_user_id = ${user.id} and fb.user_id = u.id
+      where f.user_id = ${user.id}
+      order by u.username
+    `)
+    console.log(following[0])
+    return response.json(following[0])
   }
 
   /**
@@ -60,15 +76,21 @@ class FollowingController {
   async search({ params, response, auth }) {
     var user = await auth.current.user
     var searchResult = await db.raw(`
-      select u.id, u.username, if(f.other_user_id IS NOT NULL, 1, 0) as following from users u
+      select 
+      u.id, 
+      u.username, 
+      if(f.other_user_id IS NOT NULL, 1, 0) as following,
+      if(fb.other_user_id IS NOT NULL, 1, 0) as follow_back
+      from users u
       join settings s on s.user_id = u.id
       left join followings f on f.user_id = ${user.id} and f.other_user_id = u.id
+      left join followings fb on fb.other_user_id = ${user.id} and fb.user_id = u.id
       where s.findable = 1
       and u.username like '%${params.searchTerm}%'
       and u.id != ${user.id}
       order by u.username
     `)
-    console.log()
+    
     return response.json(searchResult[0])
   }
 
@@ -123,6 +145,26 @@ class FollowingController {
       where user_id = ${user.id}
       and other_user_id = ${otherUser}
     `)
+    return response.status(200).send("OK")
+  }
+
+  async block({ params, response, auth }){
+    var user = await auth.current.user
+    var other_user_id = params.id
+    var following = await Following.query().where('user_id', user.id).where('other_user_id', other_user_id).first()
+    following.block = 1
+    await following.save()
+    console.log(following)
+    return response.status(200).send("OK")
+  }
+  
+  async unblock({ params, response, auth }){
+    var user = await auth.current.user
+    var other_user_id = params.id
+    var following = await Following.query().where('user_id', user.id).where('other_user_id', other_user_id).first()
+    following.block = 0
+    await following.save()
+    console.log(following)
     return response.status(200).send("OK")
   }
 }

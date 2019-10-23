@@ -37,6 +37,8 @@ Route.group(()=>{
   Route.post('/following', 'FollowingController.store').middleware('auth')
   Route.put('/following/:id', 'FollowingController.update').middleware('auth')
   Route.delete('/following/:id', 'FollowingController.destroy').middleware('auth')
+  Route.put('/following/block/:id', 'FollowingController.block').middleware('auth')
+  Route.put('/following/unblock/:id', 'FollowingController.unblock').middleware('auth')
   Route.get('/search/friends/:searchTerm', 'FollowingController.search').middleware('auth')
 
 }).prefix('api/v1')
