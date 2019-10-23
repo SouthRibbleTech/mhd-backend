@@ -11,6 +11,7 @@ class InviteSchema extends Schema {
       table.string('email')
       table.datetime('accepted_at')
       table.integer('invited_user').unsigned()
+      table.text('uuid').notNullable()
       table.timestamps()
     })
   }

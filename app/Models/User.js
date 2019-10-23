@@ -58,6 +58,14 @@ class User extends Model {
   settings() {
     return this.hasOne('App/Models/Setting')
   }
+
+  following() {
+    return this.hasMany('App/Models/Following')
+  }
+
+  followers() {
+    return this.hasMany('App/Models/Follower')
+  }
 }
 
 module.exports = User

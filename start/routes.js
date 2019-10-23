@@ -33,5 +33,10 @@ Route.group(()=>{
   Route.delete('/invite/:id', 'InviteController.destroy').middleware('auth')
   Route.get('/settings', 'SettingController.index').middleware('auth')
   Route.put('/settings','SettingController.update').middleware('auth')
+  Route.get('/following', 'FollowingController.index').middleware('auth')
+  Route.post('/following', 'FollowingController.store').middleware('auth')
+  Route.put('/following/:id', 'FollowingController.update').middleware('auth')
+  Route.delete('/following/:id', 'FollowingController.destroy').middleware('auth')
+  Route.get('/search/friends/:searchTerm', 'FollowingController.search').middleware('auth')
 
 }).prefix('api/v1')

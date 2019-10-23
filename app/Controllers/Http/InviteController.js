@@ -1,5 +1,9 @@
 'use strict'
-
+const Invite = use('App/Models/Invite')
+const User = use('App/Models/User')
+const Mail = use('Mail')
+const uuidv4 = require('uuid/v4')
+const Env = use('Env')
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
@@ -17,7 +21,10 @@ class InviteController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
+  async index ({ response, auth }) {
+    var user = await auth.current.user
+    var invitesSent = await user.invitesSent().fetch()
+    return response.json(invitesSent)
   }
 
   /**
@@ -40,7 +47,44 @@ class InviteController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store ({ request, response, auth }) {
+    var user = await auth.current.user
+    
+    if(!request.body.email && !request.body.invited_user_id) {
+      //No email or user id was provided. Return an error
+      return response.status(400).send("no email or user sent")
+    }
+    if (request.body.invited_user_id > 0) {
+      //Check that userid exists
+      var invited_user = await User.find(request.body.invited_user_id)
+      if (!invited_user) {
+        //if not return an error
+        return response.status(400).send("Invited user not found")
+      }
+    }
+
+
+    //Save the invite
+    //Craete a unique ID for this invite
+    var inviteID = uuidv4()
+    var invite = new Invite()
+    invite.invited_by = user.id
+    invite.email = request.body.email
+    invite.invite_user = request.body.invited_user_id
+    invite.uuid = inviteID
+    await invite.save()
+
+    if(request.body.email){
+      //Send email to invited user
+      await Mail.send('emails.invite', {user: user.toJSON(), inviteID}, (message)=>{
+        message
+        .to(request.body.email)
+        .from(Env.get('SUPPORT_EMAIL'))
+        .subject('You have been invited to follow ' + user.username)
+      })
+    }
+
+    return response.status(200)
   }
 
   /**
