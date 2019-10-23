@@ -9,7 +9,7 @@ class Following extends Model {
   }
 
   followingUser() {
-    return this.belongsTo('App/Models/User', 'other_user_id', 'user_id')
+    return this.belongsTo('App/Models/User', 'other_user_id', 'id')
   }
 }
 

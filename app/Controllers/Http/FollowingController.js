@@ -21,7 +21,9 @@ class FollowingController {
    */
   async index ({ response, auth }) {
     var user = await auth.current.user
-    var following = await user.following().fetch()
+    var following = await user.following().with('followingUser', (builder)=>{
+      builder.select('id', 'username')
+    }).fetch()
     return response.json(following)
   }
 
