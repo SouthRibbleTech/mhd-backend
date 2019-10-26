@@ -1,6 +1,7 @@
 'use strict'
 const Diary = use('App/Models/Diary')
 const DoingTags = use('App/Models/DoingTag')
+const User = use('App/Models/User')
 const PeopleTags = use('App/Models/PeopleTag')
 const Promise = require('bluebird')
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
@@ -22,13 +23,45 @@ class DiaryController {
    */
   async index ({ response, params, auth }) {
     var user = await auth.current.user
+    var userToView = params.id || false
+    if(userToView ){
+      if (await this.checkFriends(user.id, userToView)) {
+      //A request was made to view another user and we confirm they are friends
+      var otherUser = await User.find(userToView)
+      var diary = await otherUser
+        .diaryEnteries()
+        .orderBy('created_at', 'desc')
+        .with('doingTags')
+        .with('peopleTags')
+        .where('private', 0)
+        .paginate(params.page, params.perPage)
+      return response.json({diary, otherUser})
+      } else{
+      return response.status(400).send("The users diary you are trying to view is not currently a friend")
+      }
+    }
+    
     var diary = await user
     .diaryEnteries()
     .orderBy('created_at', 'desc')
     .with('doingTags')
     .with('peopleTags')
     .paginate(params.page, params.perPage)
-    return response.json(diary)
+    return response.json({diary})
+  }
+
+  async checkFriends(userID, otherUserID) {
+    var friend = await User
+      .query().whereHas('following', (builder) => {
+        builder.where('other_user_id', otherUserID)
+      })
+      .where('id', userID)
+      .first()
+    console.log(friend)
+    if(friend) {
+      return true
+    }
+    return false
   }
 
   /**
